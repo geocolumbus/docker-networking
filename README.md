@@ -62,6 +62,55 @@ The custom bridge network these features
 * It can ping the host IP address
 * It can ping external servers, like google.com
 
+## Host Network (host driver)
+
+If you are hosting an nginx server inside a docker container on a default bridge network, you do it like this:
+
+    docker run --rm -d --name nginx -p 80:80 nginx
+
+If you want that container to be directly hosted by your local machine, you do it like this. No need to bridge port 80, and you specify the network is host.
+
+    docker run --rm -d --name nginx --network host nginx
+
+Now every port that nginx works with is connected to your localhost
+
+## MACVlan Network
+
+The docker container has a unique MAC address that can be used to create a unique IP Address on your local network.
+
+    docker network create -d macvlan --subnet 192.168.0.0/24 --gateway 192.168.0.1
+
+Sadly, it does not get a new IP address fromt eh DHCP server. Instead, it assigns the first one that it knows is available, which is 192.168.0.1. This immediately causes and IP address conflict with the local gateway.
+
+So you need to add another parameter to set the range that the docker host can assign
+
+    --ip-range 192.168.0.233/32  <--- limited to just one IP address not used by any other device on the network
+
+Also add these parameters and the name
+
+    -o parent=ens18 custom_mac_vlan
+
+You can run against that network by specifying ```--network custom_mac_vlan```
+
+## IPVlan Network
+
+When you use docker run, specify the ip address:
+
+    --ip 192.168.0.233 ----network custom_ip_vlan
+
+* MACVlan networks have a separate MAC address for each container.
+* IPVLan networks have the same MAC address for all containers.
+
+IPVlan is useful when a switch does not like that separate ports are running different MAC addresses. With IPVlans, all the ports will have the same MAC address.
+
+IPVlan's can also operate in layer 2 and 3 mode.
+
+## Overlay Network
+
+For multiple docker hosts in a swarm cluster - connect with one network spread across those different hosts. But if you need a cluster to run containers, just go with Kubernetes.
+
+
+
 ## References
 
 * [NetShoot](https://github.com/nicolaka/netshoot)
