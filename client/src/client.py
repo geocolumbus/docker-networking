@@ -9,7 +9,7 @@ SERVER_IP = os.getenv("SERVER_IP") or "localhost"
 SERVER_PORT = int(os.getenv("SERVER_PORT") or "5000")
 MESSAGE = os.getenv("MESSAGE") or "default message"
 
-print(f'Connecting to "{MESSAGE}" at {SERVER_IP}:{SERVER_PORT}')
+print(f"Connecting to {SERVER_IP}:{SERVER_PORT}")
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     connected = False
@@ -29,6 +29,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             count += 1
             message = f"{count} - {MESSAGE}"
             s.sendall(message.encode())
+            print(f'Sent "{message}" to {SERVER_IP}:{SERVER_PORT}')
         except Exception as e:
             print(
                 f'Unable to send "{MESSAGE}" to {SERVER_IP}:{SERVER_PORT} because {e}'
